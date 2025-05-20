@@ -1,13 +1,13 @@
 package messages
 
-func Get(key, lang string) string {
+func GetMessage(key string, lang string) string {
     switch lang {
     case "ar":
-        if msg, ok := AR[key]; ok {
+        if msg, ok := ArMessages[key]; ok {
             return msg
         }
     default:
-        if msg, ok := EN[key]; ok {
+        if msg, ok := EnMessages[key]; ok {
             return msg
         }
     }

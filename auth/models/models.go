@@ -9,14 +9,19 @@ type User struct {
     Password  string            `json:"-"`
     Tokens    map[string]string `json:"tokens"`
     LastLogin time.Time         `json:"last_login"`
-    Language  string            `json:"language"`
+}
+
+type Device struct {
+    ID     int    `json:"id"`
+    IMEI   string `json:"imei"`
+    Token  string `json:"token"`
 }
 
 type AuthResponse struct {
-    Status  int         `json:"status"`
-    Message string      `json:"message"`
-    Data    interface{} `json:"data,omitempty"`
-    Token   string      `json:"token,omitempty"`
+    User  *User `json:"user"`  // Change to pointer type
+    Token string `json:"token"`
+    Status  int    `json:"status"`
+    Message string `json:"message"`
 }
 
 type EditProfileRequest struct {

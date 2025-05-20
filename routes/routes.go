@@ -2,20 +2,17 @@ package routes
 
 import (
 	"net/http"
-	"wadood/handlers"
+	"wadood/auth"
+	"github.com/gin-gonic/gin" 
 )
 
-func Setup() *http.ServeMux {
-	r := http.NewServeMux()
-
-	r.HandleFunc("POST /register", handlers.RegisterHandler)
-	r.HandleFunc("POST /login", handlers.LoginHandler)
-	r.HandleFunc("POST /logout", handlers.LogoutHandler)
-	r.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "text/plain")
-		w.Write([]byte("Welcome to Wadood API"))
-	})
-	r.HandleFunc("POST /profile/edit", handlers.EditProfileHandler)
-
-	return r
+func Setup() *gin.Engine {
+    r := gin.Default()
+    r.POST("/register", auth.Register)
+    r.POST("/login", auth.Login)
+    r.POST("/logout", auth.Logout)
+    r.GET("/", func(c *gin.Context) {
+        c.String(http.StatusOK, "Welcome to Wadood API")
+    })
+    return r
 }
