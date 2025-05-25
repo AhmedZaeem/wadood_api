@@ -11,6 +11,7 @@ import (
 )
 
 var EmailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+var PhoneRegex = regexp.MustCompile(`^\+?[1-9]\d{7,14}$`)
 var jwtSecret = []byte("your-very-secure-secret")
 
 func RespondJSON(w http.ResponseWriter, status int, resp interface{}) {
@@ -62,6 +63,10 @@ func ValidatePassword(password string) error {
 		return fmt.Errorf("password must contain at least one special character")
 	}
 	return nil
+}
+
+func ValidatePhoneNumber(phone string) bool {
+	return PhoneRegex.MatchString(phone)
 }
 
 func GenerateJWT(userID int, imei string) (string, error) {

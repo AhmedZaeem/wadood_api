@@ -1,29 +1,35 @@
 package main
 
 import (
-    "fmt"
-    "log"
-    "net/http"
-    "time"
-    "wadood/routes"
-    "wadood/db"
+	"fmt"
+	"github.com/joho/godotenv"
+	"log"
+	"net/http"
+	"time"
+	"wadood/db"
+	"wadood/routes"
 )
 
 func main() {
-    err := db.InitDB()
-    if err != nil {
-        log.Fatalf("Failed to connect to database: %v", err)
-    }
-    router := routes.Setup()
+	// Load environment variables from .env file
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found or failed to load .env file")
+	}
 
-    srv := &http.Server{
-        Addr:         ":8080",
-        Handler:      router,
-        ReadTimeout:  1 * time.Minute,
-        WriteTimeout: 1 * time.Minute,
-        IdleTimeout:  1 * time.Minute,
-    }
+	err := db.InitDB()
+	if err != nil {
+		log.Fatalf("Failed to connect to database: %v", err)
+	}
+	router := routes.Setup()
 
-    fmt.Println("Server running on port 8080")
-    log.Fatal(srv.ListenAndServe())
+	srv := &http.Server{
+		Addr:         ":8080",
+		Handler:      router,
+		ReadTimeout:  1 * time.Minute,
+		WriteTimeout: 1 * time.Minute,
+		IdleTimeout:  1 * time.Minute,
+	}
+
+	fmt.Println("Server running on port 8080")
+	log.Fatal(srv.ListenAndServe())
 }

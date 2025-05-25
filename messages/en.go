@@ -45,4 +45,10 @@ var EnMessages = map[string]string{
 	"pet_not_found":                          "Pet not found",
 	"pet_updated_success":                    "Pet updated successfully",
 	"pet_deleted_success":                    "Pet deleted successfully",
+	"missing_phone_number":                   "Phone number is required.",
+	"invalid_phone_number":                   "Invalid phone number format.",
+	"otp_sent":                               "OTP sent successfully.",
+	"otp_failed":                             "Failed to send OTP.",
+	"otp_invalid":                            "Invalid OTP.",
+	"otp_verified":                           "OTP verified successfully.",
 }

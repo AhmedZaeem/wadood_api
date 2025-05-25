@@ -16,8 +16,8 @@ import (
 
 type UserService struct{}
 
-func RegisterUser(username, email, password, imei, language string) (int, *models.User, string, error) {
-	if username == "" || email == "" || password == "" || imei == "" {
+func RegisterUser(username, email, password, phoneNumber, imei, language string) (int, *models.User, string, error) {
+	if username == "" || email == "" || password == "" || phoneNumber == "" || imei == "" {
 		return http.StatusBadRequest, nil, "", fmt.Errorf(messages.GetMessage("missing_required_fields", language))
 	}
 	if !utils.EmailRegex.MatchString(email) {
@@ -25,6 +25,9 @@ func RegisterUser(username, email, password, imei, language string) (int, *model
 	}
 	if !utils.HasComplexity(password) {
 		return http.StatusBadRequest, nil, "", fmt.Errorf(messages.GetMessage("password_too_simple", language))
+	}
+	if !utils.ValidatePhoneNumber(phoneNumber) {
+		return http.StatusBadRequest, nil, "", fmt.Errorf(messages.GetMessage("invalid_phone_number", language))
 	}
 	errMsg := ""
 	err := utils.ValidatePassword(password)
@@ -44,7 +47,7 @@ func RegisterUser(username, email, password, imei, language string) (int, *model
 		return http.StatusBadRequest, nil, "", fmt.Errorf(errMsg)
 	}
 	var exists int
-	err = db.DB.QueryRow("SELECT COUNT(*) FROM users WHERE LOWER(email) = LOWER(?) OR LOWER(username) = LOWER(?)", email, username).Scan(&exists)
+	err = db.DB.QueryRow("SELECT COUNT(*) FROM users WHERE LOWER(email) = LOWER(?) OR LOWER(username) = LOWER(?) OR phone_number = ?", email, username, phoneNumber).Scan(&exists)
 	if err != nil {
 		return http.StatusInternalServerError, nil, "", fmt.Errorf(messages.GetMessage("database_error", language))
 	}
@@ -52,12 +55,12 @@ func RegisterUser(username, email, password, imei, language string) (int, *model
 		return http.StatusConflict, nil, "", fmt.Errorf(messages.GetMessage("username_or_email_already_exists", language))
 	}
 	hashed, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	res, err := db.DB.Exec("INSERT INTO users (username, email, password, tokens, last_login, language) VALUES (?, ?, ?, '{}', ?, ?)", username, email, string(hashed), time.Now(), language)
+	res, err := db.DB.Exec("INSERT INTO users (username, email, password, phone_number, tokens, last_login, language) VALUES (?, ?, ?, ?, '{}', ?, ?)", username, email, string(hashed), phoneNumber, time.Now(), language)
 	if err != nil {
 		return http.StatusInternalServerError, nil, "", fmt.Errorf(messages.GetMessage("registration_failed", language))
 	}
 	id, _ := res.LastInsertId()
-	user := &models.User{ID: int(id), Username: username, Email: email, Tokens: make(map[string]string), LastLogin: time.Now()}
+	user := &models.User{ID: int(id), Username: username, Email: email, PhoneNumber: phoneNumber, Tokens: make(map[string]string), LastLogin: time.Now()}
 	token, err := utils.GenerateJWT(user.ID, imei)
 	if err != nil {
 		return http.StatusInternalServerError, nil, "", fmt.Errorf(messages.GetMessage("token_generation_error", language))

@@ -44,4 +44,10 @@ var ArMessages = map[string]string{
 	"pet_not_found":                          "لم يتم العثور على الحيوان الأليف",
 	"pet_updated_success":                    "تم تحديث الحيوان الأليف بنجاح",
 	"pet_deleted_success":                    "تم حذف الحيوان الأليف بنجاح",
+	"missing_phone_number":                   "رقم الهاتف مطلوب.",
+	"invalid_phone_number":                   "تنسيق رقم الهاتف غير صالح.",
+	"otp_sent":                               "تم إرسال رمز التحقق بنجاح.",
+	"otp_failed":                             "فشل في إرسال رمز التحقق.",
+	"otp_invalid":                            "رمز التحقق غير صالح.",
+	"otp_verified":                           "تم التحقق من رمز التحقق بنجاح.",
 }
