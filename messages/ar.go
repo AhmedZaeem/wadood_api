@@ -50,4 +50,7 @@ var ArMessages = map[string]string{
 	"otp_failed":                             "فشل في إرسال رمز التحقق.",
 	"otp_invalid":                            "رمز التحقق غير صالح.",
 	"otp_verified":                           "تم التحقق من رمز التحقق بنجاح.",
+	"forget_password_otp_sent":               "تم إرسال رمز التحقق لإعادة تعيين كلمة المرور.",
+	"forget_password_user_not_found":         "لم يتم العثور على مستخدم لإعادة تعيين كلمة المرور.",
+	"forget_password_failed":                 "فشل في إرسال رمز التحقق لإعادة تعيين كلمة المرور.",
 }

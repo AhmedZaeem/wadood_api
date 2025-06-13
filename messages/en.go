@@ -51,4 +51,7 @@ var EnMessages = map[string]string{
 	"otp_failed":                             "Failed to send OTP.",
 	"otp_invalid":                            "Invalid OTP.",
 	"otp_verified":                           "OTP verified successfully.",
+	"forget_password_otp_sent":               "OTP sent for password reset.",
+	"forget_password_user_not_found":         "User not found for password reset.",
+	"forget_password_failed":                 "Failed to send OTP for password reset.",
 }

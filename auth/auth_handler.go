@@ -8,7 +8,7 @@ import (
 	"wadood/auth/models"
 	"wadood/auth/services"
 	"wadood/messages"
-	"wadood/utils"
+	utils "wadood/utils"
 )
 
 func Register(c *gin.Context) {
@@ -46,7 +46,7 @@ func Register(c *gin.Context) {
 	SetRegistrationData(req.PhoneNumber, regData)
 	otp := generateOTP()
 	SetOTP(req.PhoneNumber, otp)
-	err := utils.SendSMS(req.PhoneNumber, fmt.Sprintf("Your OTP code is: %s", otp))
+	err := utils.SendOTP(req.PhoneNumber, fmt.Sprintf("Your OTP code is: %s", otp))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.AuthResponse{Status: http.StatusInternalServerError, Message: messages.GetMessage("otp_failed", language)})
 		return
@@ -187,10 +187,85 @@ func ResendOTP(c *gin.Context) {
 	}
 	otp := generateOTP()
 	SetOTP(req.PhoneNumber, otp)
-	err := utils.SendSMS(req.PhoneNumber, fmt.Sprintf("Your OTP code is: %s", otp))
+	err := utils.SendOTP(req.PhoneNumber, fmt.Sprintf("Your OTP code is: %s", otp))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": messages.GetMessage("otp_failed", language)})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": messages.GetMessage("otp_sent", language)})
+}
+
+func ForgetPassword(c *gin.Context) {
+	var req struct {
+		Login            string `json:"login"`
+		VerificationType string `json:"verification_type"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, models.AuthResponse{Status: http.StatusBadRequest, Message: messages.GetMessage("invalid_json_format", "en")})
+		return
+	}
+	language := c.GetHeader("X-Language")
+	if language == "" {
+		language = "en"
+	}
+	var user *models.User
+	var err error
+	if req.Login != "" {
+		user, err = services.FindUserByLogin(req.Login)
+	} else {
+		err = fmt.Errorf("login field is empty")
+	}
+	if err != nil || user == nil {
+		c.JSON(http.StatusNotFound, models.AuthResponse{Status: http.StatusNotFound, Message: messages.GetMessage("forget_password_user_not_found", language)})
+		return
+	}
+	otp := generateOTP()
+	SetOTP(req.Login, otp)
+	var sendErr error
+	switch req.VerificationType {
+	case "phone", "whatsapp":
+		// Always validate phone number before sending SMS
+		if !utils.ValidatePhoneNumber(user.PhoneNumber) {
+			c.JSON(http.StatusBadRequest, models.AuthResponse{Status: http.StatusBadRequest, Message: messages.GetMessage("invalid_phone_number", language)})
+			return
+		}
+		sendErr = utils.SendOTP(user.PhoneNumber, fmt.Sprintf("Your OTP code is: %s", otp))
+	case "email":
+		if !utils.EmailRegex.MatchString(user.Email) {
+			c.JSON(http.StatusBadRequest, models.AuthResponse{Status: http.StatusBadRequest, Message: messages.GetMessage("invalid_email_format", language)})
+			return
+		}
+		//subject := "Your Password Reset OTP"
+		//sendErr = utils.SendMailgunEmail(user.Email, subject, otp)
+	default:
+		c.JSON(http.StatusBadRequest, models.AuthResponse{Status: http.StatusBadRequest, Message: messages.GetMessage("invalid_input", language)})
+		return
+	}
+	if sendErr != nil {
+		c.JSON(http.StatusInternalServerError, models.AuthResponse{Status: http.StatusInternalServerError, Message: messages.GetMessage("forget_password_failed", language)})
+		return
+	}
+	c.JSON(http.StatusOK, models.AuthResponse{Status: http.StatusOK, Message: messages.GetMessage("forget_password_otp_sent", language)})
+}
+
+func VerifyForgetPasswordOTP(c *gin.Context) {
+	var req struct {
+		Login string `json:"login"`
+		OTP   string `json:"otp"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, models.AuthResponse{Status: http.StatusBadRequest, Message: messages.GetMessage("invalid_json_format", "en")})
+		return
+	}
+	language := c.GetHeader("X-Language")
+	if language == "" {
+		language = "en"
+	}
+	storedOTP, ok := GetOTP(req.Login)
+	if !ok || storedOTP != req.OTP {
+		c.JSON(http.StatusUnauthorized, models.AuthResponse{Status: http.StatusUnauthorized, Message: messages.GetMessage("otp_invalid", language)})
+		return
+	}
+	DeleteOTP(req.Login)
+	c.JSON(http.StatusOK, models.AuthResponse{Status: http.StatusOK, Message: messages.GetMessage("otp_verified", language)})
 }

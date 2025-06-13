@@ -248,3 +248,8 @@ func FindUserByToken(token string) (*models.User, string, error) {
 	}
 	return nil, "", nil
 }
+
+// FindUserByLogin exposes getUserByIdentifier for external use
+func FindUserByLogin(login string) (*models.User, error) {
+	return getUserByIdentifier(login)
+}

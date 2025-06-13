@@ -20,6 +20,8 @@ func Setup() *gin.Engine {
 	r.POST("/send_otp", auth.SendOTP)
 	r.POST("/verify_otp", auth.VerifyOTP)
 	r.POST("/resend_otp", auth.ResendOTP)
+	r.POST("/forget_password", auth.ForgetPassword)
+	r.POST("/verify_forget_password_otp", auth.VerifyForgetPasswordOTP)
 	r.GET("/get_pets", petHandler.GetPets)
 	r.POST("/add_pet", petHandler.AddPet)
 	r.PUT("/edit_pet/:id", petHandler.EditPet)
