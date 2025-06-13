@@ -1,7 +1,5 @@
 # Wadood API
 
-![Wadood Logo](https://img.icons8.com/color/96/pet-commands-train.png)
-
 Wadood is a simple, robust, and extensible RESTful API for managing pets and user accounts, built with Go (Golang) and Gin. It is designed for pet lovers, shelters, and anyone who wants to build pet care or adoption platforms. Wadood provides secure authentication, OTP-based registration, and full CRUD operations for pets.
 
 ---
